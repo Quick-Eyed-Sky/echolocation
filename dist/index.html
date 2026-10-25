@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="A creative oracle for any medium. Ask, cast five cards, read what is and what is becoming.">
+<title>Echolocation</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 52' fill='none' stroke='%23b9500f' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 40 C 16 18, 38 8, 58 14 C 63 15.5, 67 17, 72 17.5 C 68 20, 63 21, 58 21.5 C 48 23, 36 28, 24 38 C 21 40.5, 18 43, 16 46 L 7 49 M16 46 L 13 37 M34 13.5 C 33 9, 31 6, 27 4 C 33 4.5, 39 7, 41 11'/%3E%3C/svg%3E">
+<style>
+/* An oracle table: a question, a cast of five cards read bottom to top like a figure of lines, and a joker kept in the corner. */
+:root{
+  --paper:#f5f2ec; --card:#fffdf9; --ink:#1f2226; --muted:#686c72; --rule:#e2dcd2;
+  --accent:#b9500f; --accent-soft:#f6e3d4; --on-accent:#fffdf9;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#15171a; --card:#1d2024; --ink:#ebe7e1; --muted:#9a9ea5; --rule:#2d3136;
+  --accent:#f08a4b; --accent-soft:#3a2618; --on-accent:#15171a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#15171a; --card:#1d2024; --ink:#ebe7e1; --muted:#9a9ea5; --rule:#2d3136;
+  --accent:#f08a4b; --accent-soft:#3a2618; --on-accent:#15171a; color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:820px;margin:0 auto;display:grid;gap:24px}
+header{display:flex;gap:14px;align-items:center}
+.logo{width:58px;height:auto;color:var(--accent);flex:none}
+.brand{flex:1;min-width:0}
+h1{font-family:var(--sans);font-weight:700;letter-spacing:-.02em;font-size:26px;line-height:1.1;margin:0}
+.tag{margin:2px 0 0;color:var(--muted)}
+.joker{flex:none;font-family:var(--sans);font-weight:600;font-size:14px;border:1px dashed var(--accent);background:transparent;color:var(--accent);border-radius:10px;padding:9px 13px;cursor:pointer;line-height:1.2;text-align:center}
+.joker small{display:block;font-family:var(--mono);font-weight:400;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+.jpanel{background:var(--card);border:1px dashed var(--accent);border-radius:14px;padding:16px;display:grid;gap:12px}
+.jpanel[hidden]{display:none}
+.jhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.jhead b{font-family:var(--sans);font-size:15px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--sans);font-size:14.5px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer}
+.jcard{border-top:1px solid var(--rule);padding-top:12px}
+.jcard .lbl{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.jcard h3{font-family:var(--sans);font-size:24px;line-height:1.15;margin:4px 0}
+.jcard p{margin:0;font-size:17px}
+.link{all:unset;cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--muted);border-bottom:1px dotted var(--muted)}
+.ask{display:grid;gap:10px}
+.ask label{font-family:var(--sans);font-weight:600;font-size:15px;color:var(--muted)}
+.askrow{display:flex;gap:10px;flex-wrap:wrap}
+.askrow input{flex:1 1 260px;min-width:0;font:inherit;font-size:17px;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:13px 15px}
+.cast{font-family:var(--sans);font-weight:700;font-size:18px;border:0;background:var(--accent);color:var(--on-accent);border-radius:12px;padding:13px 28px;cursor:pointer}
+button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.reading{display:grid;gap:16px}
+.reading[hidden]{display:none}
+.top{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:20px 22px}
+.fig{width:96px;height:auto}
+.fig line{stroke:var(--ink);stroke-width:7;stroke-linecap:round}
+.fig .mv line{stroke:var(--accent)}
+.fig circle{fill:var(--card);stroke:var(--accent);stroke-width:2.5}
+.fig g{opacity:0;animation:rise .4s ease forwards}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.ftxt .num{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ftxt h2{font-family:var(--sans);font-weight:700;font-size:clamp(24px,4vw,32px);letter-spacing:-.015em;line-height:1.1;margin:2px 0 6px}
+.ftxt p{margin:0;font-size:17px}
+.ftxt .q{margin-top:10px;color:var(--muted);font-size:15px}
+.image{border-left:3px solid var(--accent);padding:4px 0 4px 16px}
+.image .lbl{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.image q{display:block;font-size:clamp(21px,3.2vw,26px);line-height:1.25;quotes:none;margin-top:2px}
+.image .by{color:var(--muted);font-size:15px}
+.tier{display:grid;gap:10px}
+.tier > .tl{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;gap:10px;align-items:center}
+.tier > .tl::after{content:"";flex:1;height:1px;background:var(--rule)}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.c{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:16px 18px 15px;display:grid;gap:6px;align-content:start;opacity:0;animation:rise .4s ease forwards}
+.c .deck{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.c .deck b{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.c .deck span{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.c h3{font-family:var(--sans);font-weight:650;font-size:20px;line-height:1.2;margin:0}
+.c p{margin:0;font-size:15.5px}
+.c.mv{border-color:var(--accent)}
+.c .deck .badge{color:var(--accent)}
+.becomes{margin-top:8px;padding-top:9px;border-top:1px dashed var(--accent);display:grid;gap:3px}
+.becomes .arrow{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.becomes h3{color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font-family:var(--sans);font-weight:600;font-size:15px;border:1px solid var(--rule);background:transparent;color:var(--ink);border-radius:10px;padding:10px 16px;cursor:pointer}
+.ok{font-family:var(--mono);font-size:12px;color:var(--accent)}
+details{background:var(--card);border:1px solid var(--rule);border-radius:12px}
+summary{cursor:pointer;padding:13px 16px;font-family:var(--sans);font-weight:600;display:flex;justify-content:space-between;gap:10px;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary span{font-family:var(--mono);font-weight:400;font-size:12px;color:var(--muted);text-align:right}
+.inner{padding:0 16px 16px;display:grid;gap:12px}
+pre{margin:0;white-space:pre-wrap;font-family:var(--serif);font-size:15.5px;background:var(--paper);border-radius:9px;padding:12px 14px}
+.lists{display:grid;gap:8px}
+.lists details{background:var(--paper)}
+.lists ol{margin:0;padding:0 16px 14px 38px;font-size:14.5px}
+.lists li{margin:0 0 7px}
+.lists li b{font-family:var(--sans);font-weight:600}
+.lists li .m{color:var(--accent)}
+.lists li i{color:var(--muted)}
+.sum{margin:0;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:13px;font-family:var(--mono)}
+footer a{color:inherit}
+@media (max-width:560px){
+  header{flex-wrap:wrap}.joker{order:3;width:100%}
+  .top{grid-template-columns:1fr;justify-items:start;gap:12px;padding:18px}
+  .fig{width:80px}.cast{width:100%}}
+@media (prefers-reduced-motion:reduce){.fig g,.c{animation:none;opacity:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="logo" viewBox="0 0 80 52" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M8 40 C 16 18, 38 8, 58 14 C 63 15.5, 67 17, 72 17.5 C 68 20, 63 21, 58 21.5 C 48 23, 36 28, 24 38 C 21 40.5, 18 43, 16 46"/>
+      <path d="M16 46 L 7 49 M16 46 L 13 37"/>
+      <path d="M34 13.5 C 33 9, 31 6, 27 4 C 33 4.5, 39 7, 41 11"/>
+      <path d="M44 24 C 42 28, 40 31, 36 33"/>
+      <circle cx="59" cy="17" r=".6" fill="currentColor"/>
+      <path d="M2 50 C 6 48, 10 48, 14 50" stroke-width="1.6" opacity=".55"/>
+    </svg>
+    <div class="brand">
+      <h1>Echolocation</h1>
+      <p class="tag">A creative oracle. Send a question into the dark, read what comes back.</p>
+    </div>
+    <button class="joker" id="jokerBtn" type="button" aria-expanded="false" aria-controls="joker"><small>Joker</small>I'm stuck</button>
+  </header>
+
+  <section class="jpanel" id="joker" hidden aria-live="polite">
+    <div class="jhead"><b>Where are you stuck?</b><button class="link" type="button" id="jclose">close</button></div>
+    <div class="chips" id="chips">
+      <button class="chip" type="button" data-s="any">Anywhere</button>
+      <button class="chip" type="button" data-s="start">No idea yet</button>
+      <button class="chip" type="button" data-s="middle">Stuck in the middle</button>
+      <button class="chip" type="button" data-s="finish">Can't finish</button>
+      <button class="chip" type="button" data-s="flat">It's flat</button>
+    </div>
+    <div class="jcard" id="jcard" hidden></div>
+  </section>
+
+  <section class="ask">
+    <label for="q">What are you working on?</label>
+    <div class="askrow">
+      <input id="q" type="text" placeholder="A poem about my father, a series of night photos, a song…" autocomplete="off">
+      <button class="cast" id="cast" type="button">Cast</button>
+    </div>
+  </section>
+
+  <section class="reading" id="reading" hidden aria-live="polite">
+    <div class="top">
+      <svg class="fig" id="fig" viewBox="0 0 100 110" role="img" aria-label=""></svg>
+      <div class="ftxt">
+        <div class="num" id="fnum"></div>
+        <h2 id="fname"></h2>
+        <p id="fjudg"></p>
+        <p class="q" id="fq"></p>
+      </div>
+    </div>
+    <div class="image" id="image"></div>
+    <div id="tiers"></div>
+    <div class="row"><button class="btn" id="again" type="button">Cast again</button></div>
+  </section>
+
+
+  <details>
+    <summary>How to read it <span>the figure, moving cards, the joker</span></summary>
+    <div class="inner">
+      <p style="margin:0">A cast draws five cards, one per deck, and reads them from the bottom up. <b>State</b> is where you are: your Stance and the Form the work wants. <b>Movement</b> is what happens next: a Move to make and a Twist that drifts. <b>Proposition</b> is the Constraint you take on. A Strategy sentence sits above the reading as its image.</p>
+      <p style="margin:0">About one card in four falls <b>moving</b>: it turns into another card from the same deck. You read what is <em>now</em>, then what it is <em>becoming</em>. The five cards make a figure of five lines, still or moving, so there are 32 figures, each named after a notion with its definition.</p>
+      <p style="margin:0">The <b>Joker</b> is for when you can't even ask. Say where you're stuck and it gives you one thing to do now.</p>
+      <p style="margin:0">Nothing here is generated. Every card, figure and sentence was written by hand, in one notebook kept between 2004 and 2011.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>The 32 figures <span>read bottom to top</span></summary>
+    <div class="inner"><div class="lists"><ol id="figlist" style="margin:0;padding-left:26px"></ol></div></div>
+  </details>
+
+  <details>
+    <summary>The decks <span id="deckCount"></span></summary>
+    <div class="inner">
+      <p class="sum" id="sum"></p>
+      <div class="lists" id="lists"></div>
+    </div>
+  </details>
+
+  <footer>Echolocation 1.0 · <a href="https://github.com/Quick-Eyed-Sky/echolocation">source on GitHub</a> · MIT</footer>
+</div>
+
+<script src="decks.js"></script>
+<script src="figures.js"></script>
+<script>
+const POS=["stance","form","move","twist","constraint"]; // bottom to top
+const TIERS=[["State",["stance","form"]],["Movement",["move","twist"]],["Proposition",["constraint"]]];
+const P_MOVE=.25;
+const JOKER={any:["stance","form","move","twist","constraint"],start:["stance","form"],middle:["move","twist"],finish:["constraint","move"],flat:["twist","move"]};
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+let cast=null;
+try{const s=JSON.parse(localStorage.getItem("ds-q")||"null");if(typeof s==="string")$("q").value=s;}catch(e){}
+const saveQ=()=>{try{localStorage.setItem("ds-q",JSON.stringify($("q").value))}catch(e){}};
+function other(k,c){const all=DECKS[k].cards;let x,n=0;do{x=rnd(all);n++}while(x===c&&n<30);return x;}
+
+function doCast(){
+  const lines=POS.map(k=>{const card=rnd(DECKS[k].cards),moving=Math.random()<P_MOVE;return {deck:k,card,moving,becomes:moving?other(k,card):null};});
+  const idx=lines.reduce((a,l,i)=>a+(l.moving?1<<i:0),0);
+  cast={lines,idx,image:rnd(DECKS.strategy.cards),q:$("q").value.trim()};saveQ();render();
+  $("reading").scrollIntoView({block:"start",behavior:"smooth"});}
+
+function figSVG(lines){return lines.map((l,i)=>{const y=96-i*20;
+  return `<g class="${l.moving?"mv":""}" style="animation-delay:${i*.12}s"><line x1="10" y1="${y}" x2="90" y2="${y}"/>${l.moving?`<circle cx="50" cy="${y}" r="6"/>`:""}</g>`;}).join("");}
+
+function face(c){return `<h3>${esc(c[0])}</h3><p>${esc(c[1])}</p>`;}
+function cardHTML(l,delay){const d=DECKS[l.deck];
+  return `<article class="c${l.moving?" mv":""}" style="animation-delay:${delay}s">
+   <div class="deck"><b>${esc(d.name)}</b><span${l.moving?' class="badge"':""}>${l.moving?"moving":esc(d.hint.toLowerCase())}</span></div>
+   ${face(l.card)}${l.moving?`<div class="becomes"><span class="arrow">becoming</span>${face(l.becomes)}</div>`:""}</article>`;}
+
+function render(){
+  const {lines,idx,image,q}=cast,f=FIGURES[idx],n=lines.filter(l=>l.moving).length;
+  $("fig").innerHTML=figSVG(lines);$("fig").setAttribute("aria-label",`Figure ${idx+1}: ${n} moving line${n===1?"":"s"}`);
+  $("fnum").textContent=`Figure ${idx+1} of 32 · ${n?n+" moving":"no moving cards"}`;
+  $("fname").textContent=f[0];$("fjudg").textContent=f[1];
+  $("fq").textContent=q?`For: ${q}`:"";
+  $("image").innerHTML=`<div class="lbl">The image</div><q>${esc(image[0])}</q>${image[1]?`<div class="by">— ${esc(image[1])}</div>`:""}`;
+  let delay=.15;
+  $("tiers").innerHTML=TIERS.map(([name,ks])=>`<div class="tier" style="margin-bottom:14px"><div class="tl">${name}</div><div class="pair">${ks.map(k=>{delay+=.1;return cardHTML(lines.find(l=>l.deck===k),delay)}).join("")}</div></div>`).join("");
+  $("reading").hidden=false;}
+
+$("cast").onclick=doCast;$("again").onclick=doCast;
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter")doCast();});
+$("q").addEventListener("input",()=>{saveQ();if(cast){cast.q=$("q").value.trim();render();}});
+
+// Joker
+let jsit="any";
+function jdraw(){const ks=JOKER[jsit],tot=ks.reduce((a,k)=>a+DECKS[k].cards.length,0);let r=Math.random()*tot,k=ks[0];
+  for(const x of ks){r-=DECKS[x].cards.length;if(r<0){k=x;break}}
+  const c=rnd(DECKS[k].cards),j=$("jcard");j.hidden=false;
+  j.innerHTML=`<div class="lbl">${esc(DECKS[k].name)} · do this now</div>${face(c)}<div class="row" style="margin-top:10px"><button class="link" type="button" id="jagain">another</button></div>`;
+  $("jagain").onclick=jdraw;}
+$("jokerBtn").onclick=()=>{const p=$("joker"),open=p.hidden;p.hidden=!open;$("jokerBtn").setAttribute("aria-expanded",open);if(open&&$("jcard").hidden)jdraw();};
+$("jclose").onclick=()=>{$("joker").hidden=true;$("jokerBtn").setAttribute("aria-expanded","false");};
+document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{jsit=b.dataset.s;document.querySelectorAll(".chip").forEach(x=>x.style.borderColor=x===b?"var(--accent)":"");jdraw();});
+
+(function(){const total=Object.values(DECKS).reduce((a,d)=>a+d.cards.length,0);
+  const hands=POS.reduce((a,k)=>a*DECKS[k].cards.length,1);
+  $("deckCount").textContent=`${total} cards`;
+  $("sum").textContent=`${total} cards in 6 decks, about ${Math.round(hands/1e6)} million different casts.`;
+  ["stance","form","move","twist","constraint","strategy"].forEach(k=>{const d=DECKS[k],el=document.createElement("details");
+    el.innerHTML=`<summary>${esc(d.name)} <span>${d.cards.length} · ${esc(d.hint.toLowerCase())}</span></summary><ol>${d.cards.map(c=>k==="strategy"?`<li>${esc(c[0])}${c[1]?` <i>— ${esc(c[1])}</i>`:""}</li>`:`<li><b>${esc(c[0])}</b> ${esc(c[1])}</li>`).join("")}</ol>`;
+    $("lists").appendChild(el);});
+  $("figlist").innerHTML=FIGURES.map((f,i)=>{const mv=POS.filter((k,j)=>i&(1<<j)).map(k=>DECKS[k].name);
+    return `<li><b>${esc(f[0])}</b> <i>${mv.length?"moving: "+mv.join(", "):"nothing moves"}</i><br>${esc(f[1])}</li>`;}).join("");})();
+</script>
+</body>
+</html>
