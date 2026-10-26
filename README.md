@@ -2,7 +2,7 @@
 
 **Five cards for when you are stuck on a piece of work, any work: a poem, a photograph, a song, a book, a building. You ask a question, you cast, and you read the cards from the bottom up, like a figure of lines.**
 
-**[▶ Open in your browser](https://quick-eyed-sky.github.io/echolocation/)** · [French guide](LISEZ-MOI.md)
+**[▶ Open in your browser](https://quick-eyed-sky.github.io/echolocation/)** · [En français](https://quick-eyed-sky.github.io/echolocation/fr/) · [French guide](LISEZ-MOI.md)
 
 ![Echolocation: a question, a strategy sentence, and five cards read from the bottom up in three tiers](docs/echolocation.png)
 
@@ -28,7 +28,7 @@ Sometimes you cannot even ask a question. Press **I'm stuck**, say where: *anywh
 
 ## Nothing here is generated
 
-Every card, figure and sentence was written by hand, in one notebook kept between 2004 and 2011, then translated into English. No model writes the cards, and none is called when you cast. That is the point: the cards come from a person who was stuck too.
+Every card, figure and sentence was written by hand, in one notebook kept between 2004 and 2011, then translated into English. The [French version](https://quick-eyed-sky.github.io/echolocation/fr/) goes back to the notebook's original words instead of translating the English ([sources](SOURCES-FR.md)). No model writes the cards, and none is called when you cast. That is the point: the cards come from a person who was stuck too.
 
 - **Stance**: 52 cards
 - **Form**: 25
@@ -40,14 +40,14 @@ Every card, figure and sentence was written by hand, in one notebook kept betwee
 
 ## How it is made
 
-Plain HTML, CSS and JavaScript, with no build step and no packages. The cards are in [`dist/decks.js`](dist/decks.js), the figures in [`dist/figures.js`](dist/figures.js), and the page in [`dist/index.html`](dist/index.html). Open `dist/index.html` directly in a browser, or serve the folder.
+Plain HTML, CSS and JavaScript, with no build step and no packages. The cards are in [`dist/decks.js`](dist/decks.js), the figures in [`dist/figures.js`](dist/figures.js), and the page in [`dist/index.html`](dist/index.html). The French version mirrors them in [`dist/fr/`](dist/fr/). Open `dist/index.html` directly in a browser, or serve the folder.
 
 There are no analytics, remote fonts or external services. Your last question is remembered in your own browser only.
 
 With Node.js 20+:
 
 ```sh
-npm run check   # checks the decks and the 32 figures
+npm run check   # checks the decks and the 32 figures, in both languages
 ```
 
 ## Who made this
